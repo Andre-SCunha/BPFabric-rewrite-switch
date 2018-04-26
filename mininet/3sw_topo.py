@@ -2,6 +2,7 @@
 
 from mininet.net import Mininet
 from mininet.topo import Topo
+from mininet.link import TCIntf, TCLink
 from mininet.cli import CLI
 
 from eBPFSwitch import eBPFSwitch, eBPFHost
@@ -17,8 +18,8 @@ class SingleSwitchTopo(Topo):
         aggSwitch1 = self.addSwitch('s2', switch_path="../softswitch/softswitch")
         aggSwitch2 = self.addSwitch('s3', switch_path="../softswitch/softswitch")
 
-        self.addLink(aggSwitch1, coreSwitch)
-        self.addLink(aggSwitch2, coreSwitch)
+        self.addLink(aggSwitch1, coreSwitch, bw=10)
+        self.addLink(aggSwitch2, coreSwitch, bw=10)
 
         for h in xrange(4):
             host = self.addHost('h%d' % (h + 1),
@@ -26,11 +27,11 @@ class SingleSwitchTopo(Topo):
                                 mac = '00:04:00:00:00:%02x' %h)
 
             switch = aggSwitch1 if h < 2 else aggSwitch2
-            self.addLink(host, switch)
+            self.addLink(host, switch, bw=2)
 
 def main():
     topo = SingleSwitchTopo()
-    net = Mininet(topo = topo, host = eBPFHost, switch = eBPFSwitch, controller = None)
+    net = Mininet(topo = topo, host = eBPFHost, switch = eBPFSwitch, controller = None, link = TCLink, intf = TCIntf)
 
     net.start()
     CLI(net)
